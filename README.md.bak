@@ -290,7 +290,7 @@ sudo reboot   # reboot the instance to test that the app comes back on its own
 Wait ~60 seconds, reconnect, then - without starting anything:
 
 ```bash
-pm2 list             	   # myapp should be online
+pm2 list              # myapp should be online
 curl localhost:8080/health # should respond
 ```
 
