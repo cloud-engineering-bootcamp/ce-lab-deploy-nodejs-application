@@ -1,6 +1,6 @@
 # Lab M2.07 - Deploy Node.js Application
 
-**Repository:** [https://github.com/cloud-engineering-bootcamp/ce-lab-deploy-nodejs-application](https://github.com/cloud-engineering-bootcamp/ce-lab-deploy-nodejs-application)
+**Repository:** [https://github.com/cloud-engineering-bootcamp/ce-lab-deploy-nodejs-app](https://github.com/cloud-engineering-bootcamp/ce-lab-deploy-nodejs-app)
 
 **Activity Type:** Individual  
 **Estimated Time:** 45-60 minutes
@@ -50,8 +50,8 @@ Deploy a production-ready Node.js Express application:
 ### Step 1: Install Node.js
 
 ```bash
-sudo dnf install -y nodejs   # Amazon Linux 2023 has Node.js in its repos
-node -v
+sudo dnf install -y nodejs   # Amazon Linux 2023 has Node.js (and npm) in its repos
+node -v                      # print the installed version to confirm it worked
 ```
 
 **Expected outcome:** A version number prints.
@@ -61,31 +61,36 @@ node -v
 ### Step 2: Create the Application
 
 ```bash
-mkdir -p ~/app && cd ~/app
-npm init -y
-npm install express
+mkdir -p ~/app && cd ~/app   # create the project directory and move into it
+npm init -y                  # generate a default package.json
+npm install express          # install the Express web framework
 ```
+
+Create the application file. `cat > app.js <<'EOF' ... EOF` writes everything between the markers into `app.js`:
 
 ```bash
 cat > app.js <<'EOF'
 const express = require('express');
-const os = require('os');
+const os = require('os');                          // used to read the machine's hostname
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8080;             // use PORT from the environment, else default to 8080
 
+// Root route: returns basic info about the running instance as JSON
 app.get('/', (req, res) => {
   res.json({
     message: 'Week 2 Deployment Lab',
-    hostname: os.hostname(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || 'development'
+    hostname: os.hostname(),                        // this instance's hostname
+    uptime: process.uptime(),                       // seconds since the app started
+    environment: process.env.NODE_ENV || 'development'  // set to 'production' by PM2 in Step 3
   });
 });
 
+// Health check route: a lightweight endpoint monitors/load balancers can poll
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', timestamp: new Date() });
 });
 
+// Start listening for HTTP requests on the chosen port
 app.listen(port, () => console.log(`Server running on port ${port}`));
 EOF
 ```
@@ -99,21 +104,21 @@ EOF
 Install PM2, then define the app in a PM2 ecosystem file. This file is your **PM2 configuration** deliverable, and its `env` block sets `NODE_ENV` cleanly:
 
 ```bash
-sudo npm install -g pm2   # install PM2 globally
+sudo npm install -g pm2   # install PM2 globally so the `pm2` command is available system-wide
 
 cat > ~/app/ecosystem.config.js <<'EOF'
 module.exports = {
   apps: [{
-    name: 'myapp',
-    script: 'app.js',
-    env: { NODE_ENV: 'production', PORT: 8080 }
+    name: 'myapp',                                 // the name PM2 shows in `pm2 list`
+    script: 'app.js',                              // the file PM2 runs
+    env: { NODE_ENV: 'production', PORT: 8080 }    // environment variables passed to the app
   }]
 };
 EOF
 
 cd ~/app
-pm2 start ecosystem.config.js   # starts myapp with NODE_ENV=production
-pm2 list
+pm2 start ecosystem.config.js   # start the app defined in the ecosystem file (applies the env block)
+pm2 list                        # show all PM2-managed processes and their status
 ```
 
 **Expected outcome:** `status` is `online`.
@@ -161,8 +166,8 @@ sudo env PATH=$PATH:/usr/bin /usr/lib/node_modules/pm2/bin/pm2 startup systemd -
 Run that command, then save the process list and verify:
 
 ```bash
-pm2 save
-systemctl is-enabled pm2-ec2-user   # should print: enabled
+pm2 save                            # snapshot the current process list so it is restored on boot
+systemctl is-enabled pm2-ec2-user   # confirm the PM2 boot service is registered; should print: enabled
 ```
 
 **Expected outcome:** `enabled`. If it says `disabled` or errors, you skipped the printed `sudo env PATH=...` command.
@@ -194,21 +199,22 @@ Put Nginx in front of the app so public traffic on port 80 is proxied to the app
 ```bash
 sudo dnf install -y nginx
 
+# Write the proxy config. `tee` writes the heredoc contents to the file (sudo needed for /etc)
 sudo tee /etc/nginx/conf.d/app.conf <<'EOF'
 server {
-    listen 80 default_server;
-    server_name _;
-    location / {
-        proxy_pass http://127.0.0.1:8080;
+    listen 80 default_server;              # handle port 80 traffic; be the default for unmatched hosts
+    server_name _;                         # catch-all server name
+    location / {                           # for every path...
+        proxy_pass http://127.0.0.1:8080;  # ...forward the request to the app on port 8080
         proxy_http_version 1.1;
-        proxy_set_header Host $host;
+        proxy_set_header Host $host;        # pass the original Host header to the app
     }
 }
 EOF
 
-sudo sed -i '/listen       80 default_server;/d' /etc/nginx/nginx.conf   # remove stock default
-sudo nginx -t                  # validate config
-sudo systemctl enable --now nginx   # start now and on boot
+sudo sed -i '/listen       80 default_server;/d' /etc/nginx/nginx.conf   # drop the stock default_server so ours wins
+sudo nginx -t                        # validate the configuration before applying it
+sudo systemctl enable --now nginx    # start Nginx now and on every boot
 ```
 
 **Expected outcome:** `nginx -t` passes.
@@ -247,9 +253,9 @@ Shows the health endpoint is reachable through Nginx from outside the instance.
 ### Step 7: Verify Automatic Restart After a Crash
 
 ```bash
-pm2 list                    # note the restart count
-kill -9 $(pm2 pid myapp)
-sleep 2
+pm2 list                    # note the current restart count
+kill -9 $(pm2 pid myapp)    # force-kill the app process to simulate a crash
+sleep 2                     # give PM2 a moment to detect the exit and restart it
 pm2 list                    # restart count increased; status back to online
 ```
 
@@ -278,7 +284,7 @@ Proves PM2 restarts the app after a crash.
 ### Step 8: Verify the Application Survives a Reboot
 
 ```bash
-sudo reboot
+sudo reboot   # reboot the instance to test that the app comes back on its own
 ```
 
 Wait ~60 seconds, reconnect, then - without starting anything:
@@ -317,9 +323,9 @@ Proves the app returned automatically after a reboot - the lab's core success cr
 Create a **public** GitHub repository named `ce-lab-deploy-nodejs` containing:
 
 1. **Application code** - `app.js`, `package.json`
-2. **PM2 configuration** - `ecosystem.config.js`
+2. **Deployment script** - `deploy.sh` capturing the commands you ran
 3. **Nginx configuration** - `app.conf`
-4. **Deployment script** - `deploy.sh` capturing the commands you ran
+4. **PM2 configuration** - `ecosystem.config.js`
 5. **Screenshots** (in `screenshots/`):
    - `01-pm2-list-online.png` - app online under PM2
    - `02-pm2-startup-enabled.png` - startup service enabled
