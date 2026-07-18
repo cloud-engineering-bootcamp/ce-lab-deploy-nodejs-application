@@ -1,37 +1,37 @@
 # Deploy Node.js Application Lab - Solution
 
-**Student Name:** [Your Name]
-**Date Completed:** [Date]
+**Student Name:** Hafiz Abdul Quddus
+**Date Completed:** 17-07-2026
 
 ---
 
 # Environment Details
 
-| Item | Value |
-|------|-------|
-| Instance ID | [i-xxxxxxxxxxxxx] |
-| Region | [us-east-2] |
-| Public IP | [xx.xx.xx.xx] |
-| Node.js Version | [v18.x.x] |
-| App Name (PM2) | [myapp] |
-| App Port | [8080] |
+| Item            | Value               |
+| --------------- | ------------------- |
+| Instance ID     | i-06c1e6c3e50545fa6 |
+| Region          | us-east-1           |
+| Public IP       | 32.199.165.46       |
+| Node.js Version | v18.20.8            |
+| App Name (PM2)  | myapp               |
+| App Port        | 8080                |
 
 ---
 
 # Step 1: Install Node.js
 
-- [ ] Installed Node.js with `sudo dnf install -y nodejs`
-- [ ] `node -v` prints a version number
+- [X] Installed Node.js with `sudo dnf install -y nodejs`
+- [X] `node -v` prints a version number
 
-**My Node.js version:** `_______________________`
+**My Node.js version:** `v18.20.8`
 
 ---
 
 # Step 2: Create the Application
 
-- [ ] Created `~/app` and ran `npm init -y`
-- [ ] Installed `express`
-- [ ] Created `app.js` with `/` and `/health` routes
+- [X] Created `~/app` and ran `npm init -y`
+- [X] Installed `express`
+- [X] Created `app.js` with `/` and `/health` routes
 
 ---
 
@@ -47,12 +47,12 @@ screenshots/01-pm2-list-online.png
 
 ---
 
-- [ ] Installed PM2 globally with `sudo npm install -g pm2`
-- [ ] Created `ecosystem.config.js` setting `NODE_ENV=production` and `PORT=8080`
-- [ ] Started the app with `pm2 start ecosystem.config.js`
-- [ ] `pm2 list` shows `status: online`, restart count 0
-- [ ] `curl localhost:8080/health` returns `{"status":"healthy",...}`
-- [ ] `curl localhost:8080/` shows `"environment":"production"`
+- [X] Installed PM2 globally with `sudo npm install -g pm2`
+- [X] Created `ecosystem.config.js` setting `NODE_ENV=production` and `PORT=8080`
+- [X] Started the app with `pm2 start ecosystem.config.js`
+- [X] `pm2 list` shows `status: online`, restart count 0
+- [X] `curl localhost:8080/health` returns `{"status":"healthy",...}`
+- [X] `curl localhost:8080/` shows `"environment":"production"`
 
 ---
 
@@ -68,20 +68,20 @@ screenshots/02-pm2-startup-enabled.png
 
 ---
 
-- [ ] Ran `pm2 startup` and copied the printed `sudo env PATH=...` command
-- [ ] Ran that printed command
-- [ ] Ran `pm2 save` to persist the process list
-- [ ] `systemctl is-enabled pm2-ec2-user` prints `enabled`
+- [X] Ran `pm2 startup` and copied the printed `sudo env PATH=...` command
+- [X] Ran that printed command
+- [X] Ran `pm2 save` to persist the process list
+- [X] `systemctl is-enabled pm2-ec2-user` prints `enabled`
 
 ---
 
 # Step 5: Configure Nginx
 
-- [ ] Installed Nginx with `sudo dnf install -y nginx`
-- [ ] Created `/etc/nginx/conf.d/app.conf` proxying port 80 → 8080, marked `default_server`
-- [ ] Removed the stock `listen 80 default_server;` line from `nginx.conf`
-- [ ] `sudo nginx -t` passes
-- [ ] Enabled and started Nginx with `sudo systemctl enable --now nginx`
+- [X] Installed Nginx with `sudo dnf install -y nginx`
+- [X] Created `/etc/nginx/conf.d/app.conf` proxying port 80 → 8080, marked `default_server`
+- [X] Removed the stock `listen 80 default_server;` line from `nginx.conf`
+- [X] `sudo nginx -t` passes
+- [X] Enabled and started Nginx with `sudo systemctl enable --now nginx`
 
 ---
 
@@ -97,8 +97,8 @@ screenshots/03-health-endpoint.png
 
 ---
 
-- [ ] `curl localhost/health` on the instance returns `{"status":"healthy",...}`
-- [ ] `curl http://YOUR_PUBLIC_IP/health` from my laptop returns the same
+- [X] `curl localhost/health` on the instance returns `{"status":"healthy",...}`
+- [X] `curl http://YOUR_PUBLIC_IP/health` from my laptop returns the same
 - [ ] `curl http://YOUR_PUBLIC_IP/` shows `"environment":"production"`
 
 ---
@@ -115,9 +115,9 @@ screenshots/05-crash-recovery.png
 
 ---
 
-- [ ] Noted the restart count in `pm2 list` before the crash
-- [ ] Ran `kill -9 $(pm2 pid myapp)`
-- [ ] `pm2 list` shows the restart count (`↺`) incremented and status back to `online`
+- [X] Noted the restart count in `pm2 list` before the crash
+- [X] Ran `kill -9 $(pm2 pid myapp)`
+- [X] `pm2 list` shows the restart count (`↺`) incremented and status back to `online`
 
 ---
 
@@ -133,10 +133,10 @@ screenshots/04-after-reboot.png
 
 ---
 
-- [ ] Ran `sudo reboot`
-- [ ] Waited ~60 seconds and reconnected
-- [ ] Without starting anything manually, `pm2 list` shows `myapp` online
-- [ ] `curl localhost/health` responds successfully
+- [X] Ran `sudo reboot`
+- [X] Waited ~60 seconds and reconnected
+- [X] Without starting anything manually, `pm2 list` shows `myapp` online
+- [X] `curl localhost/health` responds successfully
 
 ---
 
