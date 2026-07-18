@@ -2,10 +2,10 @@
 
 **Repository:** [https://github.com/cloud-engineering-bootcamp/ce-lab-deploy-nodejs-app](https://github.com/cloud-engineering-bootcamp/ce-lab-deploy-nodejs-app)
 
-**Activity Type:** Individual  
-**Estimated Time:** 45-60 minutes
+**Activity Type:** Individual
+**Estimated Time:** 45-60 minutes 
 
-## Learning Objectives
+## Learning Objectives  
 
 - [ ] Deploy complete Node.js application to EC2
 - [ ] Configure environment variables securely
@@ -34,6 +34,7 @@ An application has been running as a backgrounded shell process and has gone dow
 ## Your Task
 
 Deploy a production-ready Node.js Express application:
+
 1. Install Node.js and dependencies
 2. Create the application code
 3. Configure environment variables
@@ -126,6 +127,7 @@ pm2 list                        # show all PM2-managed processes and their statu
 > If the restart count (`↺`) keeps rising, the app is crash-looping. Check `pm2 logs myapp --lines 50`.
 
 Verify locally:
+
 ```bash
 curl localhost:8080/health   # {"status":"healthy",...}
 curl localhost:8080/         # "environment":"production"
@@ -353,14 +355,14 @@ Before submitting, verify these are present in the `screenshots/` folder:
 
 ## Grading Rubric
 
-| Criteria | Points |
-|----------|--------|
-| **Application deployed and publicly accessible** | 30 |
-| **PM2 configured** (incl. startup persistence verified) | 20 |
-| **Nginx proxy working** | 20 |
-| **Health check endpoint** | 15 |
-| **Documentation** (incl. reboot proof) | 15 |
-| **Total** | **100** |
+| Criteria                                                      | Points        |
+| ------------------------------------------------------------- | ------------- |
+| **Application deployed and publicly accessible**        | 30            |
+| **PM2 configured** (incl. startup persistence verified) | 20            |
+| **Nginx proxy working**                                 | 20            |
+| **Health check endpoint**                               | 15            |
+| **Documentation** (incl. reboot proof)                  | 15            |
+| **Total**                                               | **100** |
 
 ---
 
